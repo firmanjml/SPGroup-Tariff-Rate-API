@@ -17,7 +17,7 @@ Install the dependencies and start the server.
 ```sh
 $ cd SPGroup-Tariff-Rate-API
 $ npm install
-$ node index.js
+$ npm start
 ```
 
 The server will be run at port 8000 by default.
