@@ -41,11 +41,9 @@
                     </div>
                     <button type="submit" class="btn btn-primary mb-2">Calculate</button>
                 </form>
-                <div id="result">
-                    
+                <div id="result">    
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -62,9 +60,9 @@
             $.ajax({
                 url: "http://localhost:8000",
                 success: function (data) {
-                    const price_rate = data.tariff_rate[0].cost_kWh / 100;
+                    const price_rate = data.tariff_rate[0].cost_kwh / 100;
                     $("#rate").text(function() {
-                        return `Today's Rate: $${data.tariff_rate[0].cost_kWh} cents`;
+                        return `Today's Rate: $${data.tariff_rate[0].cost_kwh} cents`;
                     })
                     $("#formCalculator").submit(function (e) {
                         e.preventDefault();
@@ -81,25 +79,27 @@
                             alert("Please enter something.")
                             return;
                         }
-                        if (hours > 24) {
+                        if (hours < 0 || hours > 24) {
                             alert("Invalid input for hours.")
                             return;
                         }
 
-                        if (powerOption == 0) {
-                            power /= 1000;
-                        }
-
-                        const dailyUsage = parseFloat((power * hours) * price_rate).toFixed(2);
-                        const monthlyUsage = parseFloat(dailyUsage * 30).toFixed(2);
-                        const yearlyUsage = parseFloat(monthlyUsage * 12).toFixed(2);
-
-                        $("#result").html(`<table class="table"><thead><tr><th scope="col">Usage</th><th scope="col">Cost</th></tr></thead><tbody><tr><th scope="row">Daily</th><td>$${dailyUsage}</td></tr><tr><th scope="row">Monthly</th><td>$${monthlyUsage}</td></tr><tr><th scope="row">Yearly</th><td>$${yearlyUsage}</td></tr></tbody></table>`);
-                    })
+                        $.ajax({
+                            url: 'http://localhost:8000/power',
+                            method: 'POST',
+                            data: {
+                                power,
+                                powerOption,
+                                hours
+                            },
+                            success: function(data) {
+                                $("#result").html(`<table class="table"><thead><tr><th scope="col">Usage</th><th scope="col">Cost</th></tr></thead><tbody><tr><th scope="row">Daily</th><td>$${data.result.daily_usage}</td></tr><tr><th scope="row">Monthly</th><td>$${data.result.monthly_usage}</td></tr><tr><th scope="row">Yearly</th><td>$${data.result.yearly_usage}</td></tr></tbody></table>`);
+                            }
+                        });
+                    });
                 }
             });
-        })
+        });
     </script>
 </body>
-
 </html>
